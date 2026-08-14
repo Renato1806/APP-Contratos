@@ -369,7 +369,7 @@ function Sel({value,onChange,options,disabled}) {
 //  WIZARD — NOVO CONTRATO
 // ═════════════════════════════════════════════════════════════════════════════
 const FORM_INICIAL = {
-  cnpj:'', nome:'', representante:'', cargo:'', cpfRepresentante:'',
+  cnpj:'', nome:'', representante:'', cargo:'', cpfRepresentante:'', rgRepresentante:'',
   telefone:'', email:'', endereco:'', bairro:'', cidadeUF:'', cep:'',
   inicio:'', honorarios:'', diaVencimento:'10',
   qtdFuncionarios:'0', qtdNF:'0', qtdLancamentos:'0',
@@ -462,6 +462,9 @@ function NovoContratoWizard({ onClose, onSalvo }) {
         </Field>
         <Field label="CPF do Representante">
           <Inp value={form.cpfRepresentante} onChange={v=>set('cpfRepresentante',v)} placeholder="000.000.000-00"/>
+        </Field>
+        <Field label="RG do Representante">
+          <Inp value={form.rgRepresentante} onChange={v=>set('rgRepresentante',v)} placeholder="Ex: 9.999.999-9"/>
         </Field>
         <Field label="Telefone">
           <Inp value={form.telefone} onChange={v=>set('telefone',maskFone(v))} placeholder="(44) 99999-9999"/>

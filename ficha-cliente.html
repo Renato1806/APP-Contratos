@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ficha de Cadastro — FSC Facilita</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f4f6f8;
+      color: #111827;
+      min-height: 100vh;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* ── Header ──────────────────────────────────────────── */
+    .header {
+      background: #0d5c52;
+      color: #fff;
+      padding: 0 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-mark {
+      width: 30px; height: 30px;
+      background: rgba(110,231,216,0.15);
+      border: 0.5px solid rgba(110,231,216,0.3);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .header-mark svg { display: block; }
+    .header-text h1 { font-size: 15px; font-weight: 500; line-height: 1.2; }
+    .header-text p  { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+
+    /* ── Container ───────────────────────────────────────── */
+    .container {
+      max-width: 680px;
+      margin: 20px auto;
+      padding: 0 12px 60px;
+    }
+
+    /* ── Cards ───────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      border: 0.5px solid #e5e7eb;
+      padding: 20px 18px;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: #0d5c52;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 0.5px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Fields ──────────────────────────────────────────── */
+    .field { margin-bottom: 13px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #6b7280;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .field label .req { color: #dc2626; margin-left: 2px; }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 0 13px;
+      height: 42px;
+      border: 1px solid #e5e7eb;
+      border-left: 3px solid #0d5c52;
+      border-radius: 0 6px 6px 0;
+      font-size: 15px;
+      font-family: inherit;
+      color: #111827;
+      background: #f9fafb;
+      transition: border-color 0.15s, background 0.15s;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .field textarea {
+      height: auto;
+      padding: 11px 13px;
+      resize: vertical;
+      min-height: 90px;
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath fill='%236b7280' d='M5 7L0 0h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
+      padding-right: 34px;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #0d5c52;
+      border-left-color: #0d5c52;
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(13,92,82,0.08);
+    }
+    .field .hint {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) {
+      .grid2, .grid3 { grid-template-columns: 1fr; gap: 0; }
+      .card { padding: 16px 14px; }
+      .container { margin-top: 12px; padding: 0 10px 80px; }
+    }
+
+    /* ── Sub-seção ───────────────────────────────────────── */
+    .subsec {
+      font-size: 11px;
+      font-weight: 500;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 18px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 0.5px solid #e5e7eb;
+    }
+
+    /* ── Sócio adicional ─────────────────────────────────── */
+    .socio-card {
+      background: #f9fafb;
+      border: 0.5px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+    .socio-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .socio-card-title { font-weight: 500; color: #0d5c52; font-size: 13px; }
+    .btn-remove-socio {
+      background: #fee2e2;
+      border: none;
+      color: #991b1b;
+      border-radius: 5px;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 12px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn-add-socio {
+      width: 100%;
+      padding: 11px;
+      background: #f0fdf9;
+      color: #0d5c52;
+      border: 1px dashed #a7d9d3;
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 14px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn-add-socio:active { background: #dcfce7; }
+
+    /* ── Sub-endereço dentro do sócio-card ──────────────── */
+    .socio-subsec {
+      font-size: 11px;
+      font-weight: 500;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 14px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 0.5px solid #e5e7eb;
+    }
+
+    /* ── Upload área ─────────────────────────────────────── */
+    .upload-area {
+      border: 1px dashed #d1d5db;
+      border-radius: 6px;
+      padding: 14px 12px;
+      text-align: center;
+      background: #f9fafb;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .upload-area:active { background: #f0fdf9; border-color: #0d5c52; }
+    @media (hover: hover) {
+      .upload-area:hover { border-color: #0d5c52; background: #f0fdf9; }
+    }
+    .upload-area input[type=file] { display: none; }
+    .upload-area .icon { font-size: 20px; margin-bottom: 4px; }
+    .upload-area .txt { font-size: 12px; color: #6b7280; font-weight: 500; }
+    .upload-area .sub { font-size: 10.5px; color: #9ca3af; margin-top: 3px; }
+    .file-preview {
+      margin-top: 8px;
+      background: #f0fdf9;
+      border: 0.5px solid #a7d9d3;
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 12.5px;
+      color: #0d5c52;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      word-break: break-all;
+    }
+    .file-preview button {
+      margin-left: auto;
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #991b1b;
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px 6px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Submit ──────────────────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: #0d5c52;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn-submit:active:not(:disabled) { background: #0a4840; transform: scale(0.99); }
+    @media (hover: hover) {
+      .btn-submit:hover:not(:disabled) { background: #0a4840; }
+    }
+    .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    /* ── Mensagens ───────────────────────────────────────── */
+    .msg {
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .msg.ok  { background: #dcfce7; color: #166534; border: 0.5px solid #bbf7d0; }
+    .msg.err { background: #fee2e2; color: #991b1b; border: 0.5px solid #fecaca; }
+
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .success-screen { text-align: center; padding: 48px 20px; }
+    .success-screen .icon { font-size: 52px; margin-bottom: 16px; }
+    .success-screen h2 { font-size: 19px; font-weight: 500; color: #0d5c52; margin-bottom: 10px; }
+    .success-screen p  { font-size: 14.5px; color: #6b7280; line-height: 1.7; }
+
+    /* ── Grupo de documentos ─────────────────────────────── */
+    .doc-group-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 18px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 0.5px solid #e5e7eb;
+    }
+    .doc-group-title:first-child { margin-top: 0; }
+    .doc-field-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #6b7280;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-mark">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6ee7d8" stroke-width="2.5" stroke-linecap="round">
+      <path d="M1.5 7h11M7 1.5l5.5 5.5-5.5 5.5"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1>Ficha de Cadastro</h1>
+    <p>FSC Soluções Contábeis — Abertura de Empresa</p>
+  </div>
+</div>
+
+<div class="container">
+  <div id="app"></div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbyvRTOfOyjh44rJ78ijGiTLlmNX_UM6tIeVRGYtKY6aUNQ93xon6xdoxCTVlv2lFHsq/exec';
+
+const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+
+const uploadedFiles = {};
+let sociosAdicionais = [];
+
+// ── Documentos por sócio ──────────────────────────────────────────────────────
+const DOCS_SOCIO = [
+  { key: 'rgFrente',      label: 'RG — Frente' },
+  { key: 'rgVerso',       label: 'RG — Verso' },
+  { key: 'cnh',           label: 'CNH (frente e verso)' },
+  { key: 'tituloEleitor', label: 'Título de Eleitor' },
+  { key: 'certidao',      label: 'Certidão de Nascimento / Casamento' },
+  { key: 'comprResid',    label: 'Comprovante de Residência' },
+];
+
+// ── Documentos da empresa ─────────────────────────────────────────────────────
+const DOCS_EMPRESA = [
+  { key: 'contratoLoc', label: 'Contrato de Locação' },
+  { key: 'iptuImovel',  label: 'IPTU do Imóvel' },
+  { key: 'comprEnd',    label: 'Comprovante de Endereço da Empresa' },
+  { key: 'outro',       label: 'Outro Documento' },
+];
+
+// ── Máscaras ──────────────────────────────────────────────────────────────────
+function maskCPF(v){return v.replace(/\D/g,'').slice(0,11).replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');}
+function maskTel(v){v=v.replace(/\D/g,'').slice(0,11);if(v.length<=10)return v.replace(/^(\d{2})(\d{4})(\d{0,4})$/,'($1) $2-$3');return v.replace(/^(\d{2})(\d{5})(\d{0,4})$/,'($1) $2-$3');}
+function maskCEP(v){return v.replace(/\D/g,'').slice(0,8).replace(/(\d{5})(\d)/,'$1-$2');}
+function fmtCapital(v){v=v.replace(/\D/g,'');if(!v)return '';v=(parseInt(v)/100).toFixed(2);return v.replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+
+function $(id){ return document.getElementById(id); }
+
+// ── CEP lookup — endereços fixos ──────────────────────────────────────────────
+async function buscarCEP(cepId, logId, bairroId, cidId, ufId) {
+  const cep = $('inp_'+cepId).value.replace(/\D/g,'');
+  if(cep.length !== 8) return;
+  try {
+    const r = await fetch('https://viacep.com.br/ws/'+cep+'/json/');
+    const d = await r.json();
+    if(!d.erro) {
+      if($('inp_'+logId))    $('inp_'+logId).value    = d.logradouro||'';
+      if($('inp_'+bairroId)) $('inp_'+bairroId).value = d.bairro||'';
+      if($('inp_'+cidId))    $('inp_'+cidId).value    = d.localidade||'';
+      if($('inp_'+ufId))     $('inp_'+ufId).value     = d.uf||'PR';
+    }
+  } catch(e) {}
+}
+
+// ── CEP lookup — sócio adicional ─────────────────────────────────────────────
+async function buscarCEP_soc(idx) {
+  const el = $('inp_soc_cep_'+idx);
+  if(!el) return;
+  const cep = el.value.replace(/\D/g,'');
+  if(cep.length !== 8) return;
+  try {
+    const r = await fetch('https://viacep.com.br/ws/'+cep+'/json/');
+    const d = await r.json();
+    if(!d.erro) {
+      const set = (id, val) => { const e = $(id); if(e) e.value = val; };
+      set('inp_soc_log_'+idx,    d.logradouro||'');
+      set('inp_soc_bairro_'+idx, d.bairro||'');
+      set('inp_soc_cid_'+idx,    d.localidade||'');
+      set('inp_soc_uf_'+idx,     d.uf||'PR');
+      sociosAdicionais[idx].log    = d.logradouro||'';
+      sociosAdicionais[idx].bairro = d.bairro||'';
+      sociosAdicionais[idx].cid    = d.localidade||'';
+      sociosAdicionais[idx].uf     = d.uf||'PR';
+    }
+  } catch(e) {}
+}
+
+// ── Regime de bens — sócio principal ─────────────────────────────────────────
+function toggleRegimePrincipal(val) {
+  const wrap = $('regimePrincipal_wrap');
+  const sel  = $('inp_regimePrincipal');
+  if(!wrap || !sel) return;
+  const casado = (val === 'Casado(a)' || val === 'União Estável');
+  wrap.style.display = casado ? 'block' : 'none';
+  sel.required = casado;
+  if(!casado) sel.value = '';
+}
+
+// ── Regime de bens — sócios adicionais ───────────────────────────────────────
+function toggleRegimeSoc(idx, val) {
+  const wrap = $('soc_rb_wrap_'+idx);
+  const sel  = $('inp_soc_rb_'+idx);
+  if(!wrap || !sel) return;
+  const casado = (val === 'Casado(a)' || val === 'União Estável');
+  wrap.style.display = casado ? 'block' : 'none';
+  sel.required = casado;
+  if(!casado) { sel.value = ''; sociosAdicionais[idx].regimeBens = ''; }
+}
+
+// ── Sócios adicionais ─────────────────────────────────────────────────────────
+function addSocio() {
+  sociosAdicionais.push({
+    nome:'', cpf:'', participacao:'', estadoCivil:'', regimeBens:'',
+    cep:'', log:'', num:'', comp:'', bairro:'', cid:'', uf:''
+  });
+  renderSocios();
+  renderDocs();
+}
+
+function removeSocio(idx) {
+  // Remove arquivos do sócio que está sendo removido
+  const prefix = `s${idx+1}_`;
+  Object.keys(uploadedFiles).forEach(k => { if(k.startsWith(prefix)) delete uploadedFiles[k]; });
+  sociosAdicionais.splice(idx, 1);
+  renderSocios();
+  renderDocs();
+}
+
+function renderSocios() {
+  const container = $('sociosContainer');
+  if(!container) return;
+  const REGIMES = ['Comunhão Parcial de Bens','Comunhão Universal de Bens','Separação Total de Bens','Participação Final nos Aquestos'];
+  const EC_OPTS = ['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União Estável'];
+
+  container.innerHTML = sociosAdicionais.map((s, i) => {
+    const casado = (s.estadoCivil === 'Casado(a)' || s.estadoCivil === 'União Estável');
+    const ecOpts = EC_OPTS.map(o => `<option${s.estadoCivil===o?' selected':''}>${o}</option>`).join('');
+    const rbOpts = REGIMES.map(o => `<option${s.regimeBens===o?' selected':''}>${o}</option>`).join('');
+    const ufSocOpts = UF_LIST.map(u => `<option value="${u}"${s.uf===u?' selected':''}>${u}</option>`).join('');
+
+    return `
+    <div class="socio-card">
+      <div class="socio-card-header">
+        <span class="socio-card-title">👤 ${i+2}º Sócio</span>
+        <button type="button" class="btn-remove-socio" onclick="removeSocio(${i})">✕ Remover</button>
+      </div>
+
+      <!-- Dados pessoais -->
+      <div class="field">
+        <label>Nome Completo <span class="req">*</span></label>
+        <input type="text" id="inp_soc_nome_${i}" required placeholder="Nome conforme RG/CNH"
+          value="${s.nome}" oninput="sociosAdicionais[${i}].nome=this.value"/>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>CPF <span class="req">*</span></label>
+          <input type="text" id="inp_soc_cpf_${i}" required placeholder="000.000.000-00" maxlength="14"
+            value="${s.cpf}" oninput="this.value=maskCPF(this.value);sociosAdicionais[${i}].cpf=this.value"/>
+        </div>
+        <div class="field">
+          <label>Participação no Capital (%) <span class="req">*</span></label>
+          <input type="text" id="inp_soc_part_${i}" required placeholder="Ex: 50%"
+            value="${s.participacao}" oninput="sociosAdicionais[${i}].participacao=this.value"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Estado Civil <span class="req">*</span></label>
+          <select id="inp_soc_ec_${i}" required
+            onchange="sociosAdicionais[${i}].estadoCivil=this.value;toggleRegimeSoc(${i},this.value)">
+            <option value="">Selecione</option>${ecOpts}
+          </select>
+        </div>
+        <div class="field" id="soc_rb_wrap_${i}" style="display:${casado?'block':'none'}">
+          <label>Regime de Bens <span class="req">*</span></label>
+          <select id="inp_soc_rb_${i}" ${casado?'required':''} onchange="sociosAdicionais[${i}].regimeBens=this.value">
+            <option value="">Selecione</option>${rbOpts}
+          </select>
+        </div>
+      </div>
+
+      <!-- Endereço pessoal do sócio -->
+      <div class="socio-subsec">🏠 Endereço Pessoal</div>
+      <div class="grid2">
+        <div class="field">
+          <label>CEP <span class="req">*</span></label>
+          <input type="text" id="inp_soc_cep_${i}" required placeholder="00000-000" maxlength="9"
+            value="${s.cep}"
+            oninput="this.value=maskCEP(this.value);sociosAdicionais[${i}].cep=this.value"
+            onblur="buscarCEP_soc(${i})"/>
+        </div>
+        <div class="field">
+          <label>Logradouro <span class="req">*</span></label>
+          <input type="text" id="inp_soc_log_${i}" required placeholder="Rua, Av, Travessa..."
+            value="${s.log}" oninput="sociosAdicionais[${i}].log=this.value"/>
+        </div>
+      </div>
+      <div class="grid3">
+        <div class="field">
+          <label>Número <span class="req">*</span></label>
+          <input type="text" id="inp_soc_num_${i}" required placeholder="123"
+            value="${s.num}" oninput="sociosAdicionais[${i}].num=this.value"/>
+        </div>
+        <div class="field">
+          <label>Complemento</label>
+          <input type="text" id="inp_soc_comp_${i}" placeholder="Apto, Bloco..."
+            value="${s.comp}" oninput="sociosAdicionais[${i}].comp=this.value"/>
+        </div>
+        <div class="field">
+          <label>Bairro <span class="req">*</span></label>
+          <input type="text" id="inp_soc_bairro_${i}" required placeholder="Bairro"
+            value="${s.bairro}" oninput="sociosAdicionais[${i}].bairro=this.value"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Cidade <span class="req">*</span></label>
+          <input type="text" id="inp_soc_cid_${i}" required placeholder="Cidade"
+            value="${s.cid}" oninput="sociosAdicionais[${i}].cid=this.value"/>
+        </div>
+        <div class="field">
+          <label>Estado <span class="req">*</span></label>
+          <select id="inp_soc_uf_${i}" required onchange="sociosAdicionais[${i}].uf=this.value">
+            <option value="">UF</option>${ufSocOpts}
+          </select>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Documentos ────────────────────────────────────────────────────────────────
+function renderDocField(key, label) {
+  const f = uploadedFiles[key];
+  if(f) {
+    return `<div style="margin-bottom:16px">
+      <label class="doc-field-label">${label}</label>
+      <div class="file-preview">
+        📎 ${f.name} (${(f.size/1024).toFixed(0)} KB)
+        <button type="button" onclick="removerDoc('${key}')">✕</button>
+      </div>
+    </div>`;
+  }
+  return `<div style="margin-bottom:16px">
+    <label class="doc-field-label">${label}</label>
+    <div class="upload-area" onclick="$('file_${key}').click()">
+      <input type="file" id="file_${key}" accept="image/*,.pdf" onchange="handleDoc(this,'${key}')"/>
+      <div class="icon">📄</div>
+      <div class="txt">Clique para selecionar</div>
+      <div class="sub">JPG, PNG ou PDF · máx. 5 MB</div>
+    </div>
+  </div>`;
+}
+
+function renderDocs() {
+  const container = $('docsContainer');
+  if(!container) return;
+  let html = '';
+
+  // ── Sócios ────────────────────────────────────────────────────────────────
+  // 1º Sócio (principal) — chave: s0_*
+  const nomeP = $('inp_nome')?.value?.trim();
+  html += `<div class="doc-group-title">👤 1º Sócio${nomeP ? ' — '+nomeP : ''}</div>`;
+  DOCS_SOCIO.forEach(doc => { html += renderDocField(`s0_${doc.key}`, doc.label); });
+
+  // Sócios adicionais — chave: s1_*, s2_*, ...
+  sociosAdicionais.forEach((s, i) => {
+    const label = s.nome ? `👤 ${i+2}º Sócio — ${s.nome}` : `👤 ${i+2}º Sócio`;
+    html += `<div class="doc-group-title">${label}</div>`;
+    DOCS_SOCIO.forEach(doc => { html += renderDocField(`s${i+1}_${doc.key}`, doc.label); });
+  });
+
+  // ── Empresa ───────────────────────────────────────────────────────────────
+  html += `<div class="doc-group-title">🏢 Empresa</div>`;
+  DOCS_EMPRESA.forEach(doc => { html += renderDocField(doc.key, doc.label); });
+
+  container.innerHTML = html;
+}
+
+function handleDoc(input, key) {
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 5*1024*1024) {
+    alert('Arquivo muito grande. Máximo permitido: 5 MB');
+    input.value = '';
+    return;
+  }
+  uploadedFiles[key] = file;
+  renderDocs();
+}
+
+function removerDoc(key) {
+  delete uploadedFiles[key];
+  renderDocs();
+}
+
+// Lista plana de docs para envio (calculada dinamicamente no momento do envio)
+function getDocsFlat() {
+  const flat = [];
+  DOCS_SOCIO.forEach(d => flat.push({ key:`s0_${d.key}`,  label:`1º Sócio — ${d.label}` }));
+  sociosAdicionais.forEach((s, i) => {
+    const nome = s.nome || `${i+2}º Sócio`;
+    DOCS_SOCIO.forEach(d => flat.push({ key:`s${i+1}_${d.key}`, label:`${nome} — ${d.label}` }));
+  });
+  DOCS_EMPRESA.forEach(d => flat.push({ key: d.key, label: d.label }));
+  return flat;
+}
+
+// ── Renderiza formulário ──────────────────────────────────────────────────────
+function renderForm() {
+  const ufOpts = UF_LIST.map(u => `<option value="${u}">${u}</option>`).join('');
+
+  $('app').innerHTML = `
+  <form id="fichaForm" onsubmit="enviarFicha(event)">
+
+    <!-- 1. Dados da Empresa -->
+    <div class="card">
+      <div class="card-title">🏭 Dados da Empresa</div>
+      <div class="field">
+        <label>Razão Social Pretendida <span class="req">*</span></label>
+        <input id="inp_razao" type="text" required placeholder="Ex: João Silva Serviços Ltda"/>
+        <div class="hint">Nome oficial que será registrado na Junta Comercial</div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Nome Fantasia</label>
+          <input id="inp_fantasia" type="text" placeholder="Nome comercial / marca"/>
+        </div>
+        <div class="field">
+          <label>Capital Social (R$) <span class="req">*</span></label>
+          <input id="inp_capital" type="text" required placeholder="Ex: 3.000,00"
+            oninput="this.value=fmtCapital(this.value)"/>
+          <div class="hint">Mínimo recomendado: R$ 3.000,00</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Atividades a Serem Desenvolvidas <span class="req">*</span></label>
+        <textarea id="inp_atividades" required
+          placeholder="Descreva com suas palavras o que a empresa irá fazer..."></textarea>
+        <div class="hint">Quanto mais detalhado, melhor para escolhermos o CNAE correto</div>
+      </div>
+    </div>
+
+    <!-- 2. Endereço da Empresa -->
+    <div class="card">
+      <div class="card-title">🏢 Endereço da Empresa</div>
+      <div class="field">
+        <label>Inscrição Imobiliária <span class="req">*</span></label>
+        <input id="inp_inscrImobil" type="text" required placeholder="Ex: 01.01.147.0020.001"/>
+        <div class="hint">Número da inscrição do imóvel na Prefeitura</div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Metragem Total do Imóvel (m²) <span class="req">*</span></label>
+          <input id="inp_mtgImovel" type="text" required placeholder="Ex: 120"/>
+        </div>
+        <div class="field">
+          <label>Metragem da Área da Empresa (m²) <span class="req">*</span></label>
+          <input id="inp_mtgEstab" type="text" required placeholder="Ex: 60"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>CEP <span class="req">*</span></label>
+          <input id="inp_cepEmp" type="text" required placeholder="00000-000" maxlength="9"
+            oninput="this.value=maskCEP(this.value)"
+            onblur="buscarCEP('cepEmp','logEmp','bairroEmp','cidEmp','ufEmp')"/>
+        </div>
+        <div class="field">
+          <label>Logradouro <span class="req">*</span></label>
+          <input id="inp_logEmp" type="text" required placeholder="Rua, Av, Travessa..."/>
+        </div>
+      </div>
+      <div class="grid3">
+        <div class="field">
+          <label>Número <span class="req">*</span></label>
+          <input id="inp_numEmp" type="text" required placeholder="123"/>
+        </div>
+        <div class="field">
+          <label>Complemento</label>
+          <input id="inp_compEmp" type="text" placeholder="Sala, Andar..."/>
+        </div>
+        <div class="field">
+          <label>Bairro <span class="req">*</span></label>
+          <input id="inp_bairroEmp" type="text" required placeholder="Bairro"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Cidade <span class="req">*</span></label>
+          <input id="inp_cidEmp" type="text" required placeholder="Cidade"/>
+        </div>
+        <div class="field">
+          <label>Estado <span class="req">*</span></label>
+          <select id="inp_ufEmp" required>
+            <option value="">UF</option>${ufOpts}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Contatos -->
+    <div class="card">
+      <div class="card-title">📞 Contatos</div>
+      <div class="grid2">
+        <div class="field">
+          <label>E-mail para Cartão CNPJ <span class="req">*</span></label>
+          <input id="inp_emailCnpj" type="email" required placeholder="email para cadastro na Receita"/>
+          <div class="hint">Usado no cadastro da empresa na Receita Federal</div>
+        </div>
+        <div class="field">
+          <label>E-mail para Acesso aos Sistemas <span class="req">*</span></label>
+          <input id="inp_emailEscritorio" type="email" required placeholder="email para acesso ao sistema"/>
+          <div class="hint">Usado para criação de acesso ao escritório</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Telefone da Empresa <span class="req">*</span></label>
+        <input id="inp_telEmp" type="text" required placeholder="(44) 99999-9999" maxlength="15"
+          oninput="this.value=maskTel(this.value)"/>
+      </div>
+    </div>
+
+    <!-- 4. Sócio Principal -->
+    <div class="card">
+      <div class="card-title">👤 1º Sócio / Responsável Principal</div>
+
+      <div class="field">
+        <label>Nome Completo <span class="req">*</span></label>
+        <input id="inp_nome" type="text" required placeholder="Nome conforme RG/CNH"
+          oninput="atualizarNomeSoc0()"/>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>CPF <span class="req">*</span></label>
+          <input id="inp_cpf" type="text" required placeholder="000.000.000-00" maxlength="14"
+            oninput="this.value=maskCPF(this.value)"/>
+        </div>
+        <div class="field">
+          <label>RG</label>
+          <input id="inp_rg" type="text" placeholder="0.000.000-0"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Data de Nascimento <span class="req">*</span></label>
+          <input id="inp_dtNasc" type="date" required/>
+        </div>
+        <div class="field">
+          <label>Participação no Capital (%) <span class="req">*</span></label>
+          <input id="inp_participacao" type="text" required placeholder="Ex: 100% ou 50%"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Estado Civil <span class="req">*</span></label>
+          <select id="inp_estadoCivil" required onchange="toggleRegimePrincipal(this.value)">
+            <option value="">Selecione</option>
+            <option>Solteiro(a)</option>
+            <option>Casado(a)</option>
+            <option>Divorciado(a)</option>
+            <option>Viúvo(a)</option>
+            <option>União Estável</option>
+          </select>
+        </div>
+        <div class="field" id="regimePrincipal_wrap" style="display:none">
+          <label>Regime de Bens <span class="req">*</span></label>
+          <select id="inp_regimePrincipal">
+            <option value="">Selecione</option>
+            <option>Comunhão Parcial de Bens</option>
+            <option>Comunhão Universal de Bens</option>
+            <option>Separação Total de Bens</option>
+            <option>Participação Final nos Aquestos</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Telefone / WhatsApp <span class="req">*</span></label>
+          <input id="inp_tel" type="text" required placeholder="(44) 99999-9999" maxlength="15"
+            oninput="this.value=maskTel(this.value)"/>
+        </div>
+      </div>
+
+      <!-- Endereço Pessoal do 1º Sócio -->
+      <div class="subsec">🏠 Endereço Pessoal</div>
+      <div class="grid2">
+        <div class="field">
+          <label>CEP <span class="req">*</span></label>
+          <input id="inp_cepPes" type="text" required placeholder="00000-000" maxlength="9"
+            oninput="this.value=maskCEP(this.value)"
+            onblur="buscarCEP('cepPes','logPes','bairroPes','cidPes','ufPes')"/>
+        </div>
+        <div class="field">
+          <label>Logradouro <span class="req">*</span></label>
+          <input id="inp_logPes" type="text" required placeholder="Rua, Av, Travessa..."/>
+        </div>
+      </div>
+      <div class="grid3">
+        <div class="field">
+          <label>Número <span class="req">*</span></label>
+          <input id="inp_numPes" type="text" required placeholder="123"/>
+        </div>
+        <div class="field">
+          <label>Complemento</label>
+          <input id="inp_compPes" type="text" placeholder="Apto, Bloco..."/>
+        </div>
+        <div class="field">
+          <label>Bairro <span class="req">*</span></label>
+          <input id="inp_bairroPes" type="text" required placeholder="Bairro"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Cidade <span class="req">*</span></label>
+          <input id="inp_cidPes" type="text" required placeholder="Cidade"/>
+        </div>
+        <div class="field">
+          <label>Estado <span class="req">*</span></label>
+          <select id="inp_ufPes" required>
+            <option value="">UF</option>${ufOpts}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Sócios Adicionais (dinâmico) -->
+    <div id="sociosContainer"></div>
+    <button type="button" class="btn-add-socio" onclick="addSocio()">
+      ➕ Adicionar Sócio
+    </button>
+
+    <!-- 6. Documentos -->
+    <div class="card">
+      <div class="card-title">📎 Documentos</div>
+      <p style="font-size:13px;color:#4a7c75;margin-bottom:16px;line-height:1.5">
+        Envie os documentos disponíveis. Os documentos estão organizados por <strong>sócio</strong> e por <strong>empresa</strong>.
+        Formatos aceitos: <strong>JPG, PNG ou PDF</strong> · Máximo <strong>5 MB</strong> por arquivo.
+      </p>
+      <div id="docsContainer"></div>
+    </div>
+
+    <!-- 7. Observações -->
+    <div class="card">
+      <div class="card-title">💬 Observações</div>
+      <div class="field">
+        <textarea id="inp_obs" placeholder="Alguma informação adicional que queira nos passar..."></textarea>
+      </div>
+    </div>
+
+    <div id="msgArea"></div>
+
+    <button type="submit" class="btn-submit" id="btnEnviar">
+      ✅ Enviar Ficha de Cadastro
+    </button>
+    <p style="text-align:center;font-size:12px;color:#8eada9;margin-top:12px;line-height:1.5">
+      🔒 Seus dados são enviados com segurança diretamente ao escritório FSC
+    </p>
+  </form>`;
+
+  renderSocios();
+  renderDocs();
+}
+
+// Atualiza label do 1º Sócio nos docs quando o nome é digitado
+function atualizarNomeSoc0() {
+  const el = $('inp_nome');
+  if(!el) return;
+  // Atualiza cabeçalho do grupo de docs do sócio 0 se já existir
+  renderDocs();
+}
+
+// ── Coleta dados ──────────────────────────────────────────────────────────────
+function coletarDados() {
+  const g = id => $('inp_'+id)?.value?.trim() || '';
+
+  // Texto completo de cada sócio adicional (dados pessoais + endereço)
+  const sociosTexto = sociosAdicionais.map((s, i) => {
+    const end = [
+      s.log  ? `${s.log}, ${s.num}${s.comp?' – '+s.comp:''}` : '',
+      s.bairro || '',
+      s.cid && s.uf ? `${s.cid}/${s.uf}` : s.cid || '',
+      s.cep  ? `CEP ${s.cep}` : '',
+    ].filter(Boolean).join(' — ');
+    return `${i+2}º Sócio: ${s.nome}` +
+      (s.cpf         ? ` | CPF: ${s.cpf}`                  : '') +
+      (s.participacao ? ` | Part.: ${s.participacao}`       : '') +
+      (s.estadoCivil  ? ` | Est. Civil: ${s.estadoCivil}`  : '') +
+      (s.regimeBens   ? ` (${s.regimeBens})`                : '') +
+      (end            ? `\n   Endereço: ${end}`             : '');
+  }).join('\n');
+
+  const obsBase    = g('obs');
+  const extras     = [
+    g('participacao')    ? `1º Sócio — Participação: ${g('participacao')}`       : '',
+    g('regimePrincipal') ? `1º Sócio — Regime de Bens: ${g('regimePrincipal')}` : '',
+    sociosTexto          ? `Sócios Adicionais:\n${sociosTexto}`                   : '',
+  ].filter(Boolean).join('\n');
+  const obsCompleto = obsBase + (extras ? (obsBase ? '\n\n' : '') + extras : '');
+
+  return {
+    nome:            g('nome'),
+    cpf:             g('cpf'),
+    rg:              g('rg'),
+    dtNasc:          g('dtNasc'),
+    estadoCivil:     g('estadoCivil'),
+    tel:             g('tel'),
+    email:           '',
+    emailCnpj:       g('emailCnpj'),
+    emailEscritorio: g('emailEscritorio'),
+    cepPes:    g('cepPes'),    logPes:    g('logPes'),
+    numPes:    g('numPes'),    compPes:   g('compPes'),
+    bairroPes: g('bairroPes'), cidPes:    g('cidPes'),   ufPes: g('ufPes'),
+    razao:       g('razao'),
+    fantasia:    g('fantasia'),
+    capital:     g('capital'),
+    atividades:  g('atividades'),
+    telEmp:      g('telEmp'),
+    inscrImobil: g('inscrImobil'),
+    mtgImovel:   g('mtgImovel'),
+    mtgEstab:    g('mtgEstab'),
+    cepEmp:    g('cepEmp'),    logEmp:    g('logEmp'),
+    numEmp:    g('numEmp'),    compEmp:   g('compEmp'),
+    bairroEmp: g('bairroEmp'), cidEmp:    g('cidEmp'),   ufEmp: g('ufEmp'),
+    obs:         obsCompleto,
+  };
+}
+
+// ── Validação dos sócios adicionais ──────────────────────────────────────────
+function validarSocios() {
+  for(let i = 0; i < sociosAdicionais.length; i++) {
+    const s   = sociosAdicionais[i];
+    const ord = `${i+2}º sócio`;
+    if(!s.nome.trim())        { alert(`Informe o nome completo do ${ord}.`);           $('inp_soc_nome_'+i)?.focus();  return false; }
+    if(!s.cpf.trim())         { alert(`Informe o CPF do ${ord}.`);                    $('inp_soc_cpf_'+i)?.focus();   return false; }
+    if(!s.participacao.trim()){ alert(`Informe a participação no capital do ${ord}.`); $('inp_soc_part_'+i)?.focus();  return false; }
+    if(!s.estadoCivil)        { alert(`Informe o estado civil do ${ord}.`);            $('inp_soc_ec_'+i)?.focus();    return false; }
+    const casado = (s.estadoCivil === 'Casado(a)' || s.estadoCivil === 'União Estável');
+    if(casado && !s.regimeBens){ alert(`Informe o regime de bens do ${ord}.`);          $('inp_soc_rb_'+i)?.focus();    return false; }
+    if(!s.cep.trim())          { alert(`Informe o CEP do endereço do ${ord}.`);         $('inp_soc_cep_'+i)?.focus();   return false; }
+    if(!s.log.trim())          { alert(`Informe o logradouro do ${ord}.`);              $('inp_soc_log_'+i)?.focus();   return false; }
+    if(!s.num.trim())          { alert(`Informe o número do endereço do ${ord}.`);      $('inp_soc_num_'+i)?.focus();   return false; }
+    if(!s.bairro.trim())       { alert(`Informe o bairro do endereço do ${ord}.`);      $('inp_soc_bairro_'+i)?.focus();return false; }
+    if(!s.cid.trim())          { alert(`Informe a cidade do endereço do ${ord}.`);      $('inp_soc_cid_'+i)?.focus();   return false; }
+    if(!s.uf)                  { alert(`Informe o estado (UF) do endereço do ${ord}.`); $('inp_soc_uf_'+i)?.focus();    return false; }
+  }
+  return true;
+}
+
+// ── Envio ─────────────────────────────────────────────────────────────────────
+async function enviarFicha(e) {
+  e.preventDefault();
+  if(!validarSocios()) return;
+
+  const btn = $('btnEnviar');
+  const msg = $('msgArea');
+  btn.disabled = true;
+  msg.innerHTML = '';
+
+  try {
+    const dados    = coletarDados();
+    const docsFlat = getDocsFlat();
+    const totalArqs = Object.keys(uploadedFiles).length;
+    let etapa = 0;
+
+    const setMsg = texto => { btn.innerHTML = `<span class="spinner"></span> ${texto}`; };
+    setMsg(totalArqs > 0 ? `Preparando documentos (0/${totalArqs})...` : 'Preparando dados...');
+
+    const arquivos = [];
+    for(const doc of docsFlat) {
+      const file = uploadedFiles[doc.key];
+      if(!file) continue;
+      const base64 = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = ev => res(ev.target.result.split(',')[1]);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+      etapa++;
+      arquivos.push({ key:doc.key, label:doc.label, nome:file.name, tipo:file.type, base64 });
+      setMsg(`Preparando documentos (${etapa}/${totalArqs})...`);
+    }
+    dados.arquivos = arquivos;
+    setMsg('Enviando ao escritório...');
+
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action:'salvarFichaCliente', dados:JSON.stringify(dados) }),
+    });
+    const result = await resp.json();
+
+    if(result.ok) {
+      $('app').innerHTML = `
+        <div class="card success-screen">
+          <div class="icon">✅</div>
+          <h2>Ficha enviada com sucesso!</h2>
+          <p>
+            Obrigado, <strong>${dados.nome}</strong>!<br/>
+            Recebemos suas informações e entraremos em contato em breve.<br/><br/>
+            <span style="color:#1B6963;font-weight:600;">FSC Facilita Soluções Contábeis</span>
+          </p>
+        </div>`;
+    } else {
+      throw new Error(result.error || 'Erro ao enviar. Tente novamente.');
+    }
+  } catch(err) {
+    msg.innerHTML = `<div class="msg err">⚠️ ${err.message}</div>`;
+    btn.disabled = false;
+    btn.innerHTML = '✅ Enviar Ficha de Cadastro';
+  }
+}
+
+renderForm();
+</script>
+</body>
+</html>

@@ -829,6 +829,9 @@ function Dashboard({ onNovoContrato, setView }) {
   const [socios,    setSocios]    = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState(null);
+  const donutRef    = useRef(null);
+  const progARef    = useRef(null);
+  const progAsRef   = useRef(null);
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -844,132 +847,284 @@ function Dashboard({ onNovoContrato, setView }) {
     } catch(e) { setError(e.message); }
     finally { setLoading(false); }
   }, []);
+
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    if (!contratos) return;
+    const CIRC = 251.3;
+    const pctAtivos = contratos.total > 0 ? contratos.ativos / contratos.total : 0;
+    const taxaAtivos = contratos.total > 0 ? Math.round(contratos.ativos / contratos.total * 100) : 0;
+    const taxaAssin  = contratos.total > 0 ? Math.round(contratos.assinados / contratos.total * 100) : 0;
+    requestAnimationFrame(() => {
+      if (donutRef.current) donutRef.current.style.strokeDashoffset = (CIRC*(1-pctAtivos)).toFixed(2);
+      if (progARef.current)  progARef.current.style.width  = taxaAtivos + '%';
+      if (progAsRef.current) progAsRef.current.style.width = taxaAssin  + '%';
+    });
+  }, [contratos]);
 
   if (loading) return <Spinner/>;
   if (error)   return <ErrMsg msg={error} onRetry={load}/>;
 
-  // ── Alertas de contratos ─────────────────────────────────────────────────
+  const dash = contratos;
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   const d60  = new Date(hoje); d60.setDate(d60.getDate()+60);
 
-  const contratosVencidos  = (contratos?.recentes||[]).filter(c => {
-    if (!c.vencimento || c.status === 'Cancelado') return false;
-    const [d,m,a] = c.vencimento.split('/');
-    const dt = new Date(+a,+m-1,+d);
-    return dt < hoje;
-  });
-  const contratosVencendo  = (contratos?.recentes||[]).filter(c => {
-    if (!c.vencimento || c.status === 'Cancelado') return false;
-    const [d,m,a] = c.vencimento.split('/');
-    const dt = new Date(+a,+m-1,+d);
-    return dt >= hoje && dt <= d60;
-  });
+  const parseV = v => { if (!v) return null; const p=String(v).split('/'); return p.length===3?new Date(+p[2],+p[1]-1,+p[0]):null; };
 
-  // ── Alertas de alvarás ───────────────────────────────────────────────────
-  const alvarasVencidos  = alvaras.filter(a => calcStatusAlvara(a).label === 'Vencido');
-  const alvarasRenovar   = alvaras.filter(a => calcStatusAlvara(a).label === 'A renovar');
-
-  // ── Processos Junta parados (abertura em andamento há +10 dias) ──────────
-  const processosDemorados = socios.filter(p => {
+  const contVencidos   = (dash.recentes||[]).filter(c=>{ const dt=parseV(c.vencimento); return dt&&dt<hoje&&String(c.status||'').toLowerCase()!=='cancelado'; });
+  const contVencendo   = (dash.recentes||[]).filter(c=>{ const dt=parseV(c.vencimento); return dt&&dt>=hoje&&dt<=d60&&String(c.status||'').toLowerCase()!=='cancelado'; });
+  const alvVencidos    = alvaras.filter(a=>calcStatusAlvara(a).label==='Vencido');
+  const alvRenovar     = alvaras.filter(a=>calcStatusAlvara(a).label==='A renovar');
+  const socDemorados   = socios.filter(p=>{
     if (!p.dtCriacao) return false;
-    if (p.stProcesso && p.stProcesso.includes('Cancelado')) return false;
-    if (p.stProcesso && p.stProcesso.includes('Concluído')) return false;
-    const [d,m,a] = p.dtCriacao.split('/');
-    const criacao = new Date(+a,+m-1,+d);
-    const dias = Math.floor((hoje - criacao) / 86400000);
-    return dias > 10;
+    const st=String(p.stProcesso||'').toLowerCase();
+    if (st.includes('cancelado')||st.includes('concluído')||st.includes('concluido')) return false;
+    const pts=p.dtCriacao.split('/');
+    return Math.floor((hoje-new Date(+pts[2],+pts[1]-1,+pts[0]))/86400000)>10;
   });
 
-  const temAlertas = contratosVencidos.length || contratosVencendo.length ||
-                     alvarasVencidos.length || alvarasRenovar.length ||
-                     processosDemorados.length;
+  const totalAlertas   = contVencidos.length+contVencendo.length+alvVencidos.length+alvRenovar.length+socDemorados.length;
+  const taxaAtivos     = dash.total>0?Math.round(dash.ativos/dash.total*100):0;
+  const taxaAssin      = dash.total>0?Math.round(dash.assinados/dash.total*100):0;
+  const ticketMedio    = dash.ativos>0?dash.mrr/dash.ativos:0;
+  const CIRC           = 251.3;
+  const pctAtivos      = dash.total>0?dash.ativos/dash.total:0;
 
-  const AlertBox = ({icon, bg, border, titleColor, title, subtitulo, onClick, btnLabel}) => (
-    <div onClick={onClick} style={{
-      background:bg, border:`1px solid ${border}`, borderRadius:12,
-      padding:'14px 18px', marginBottom:14, cursor:onClick?'pointer':'default',
-      display:'flex', alignItems:'flex-start', gap:12,
-    }}>
-      <span style={{fontSize:22, marginTop:1}}>{icon}</span>
-      <div style={{flex:1}}>
-        <div style={{fontWeight:700, color:titleColor, fontSize:13.5}}>{title}</div>
-        {subtitulo && <div style={{fontSize:12, color:titleColor, opacity:0.8, marginTop:3}}>{subtitulo}</div>}
-      </div>
-      {btnLabel && <span style={{fontSize:12, color:titleColor, fontWeight:600, whiteSpace:'nowrap', marginTop:2}}>{btnLabel} →</span>}
-    </div>
-  );
+  const fmtM = v => 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtS = v => { const n=Number(v||0); return n>=1000?'R$ '+(n/1000).toFixed(1).replace('.',',')+'mil':fmtM(n); };
+
+  const bStatus = s => {
+    const sl=String(s||'').toLowerCase();
+    if (sl.includes('ativo'))     return <span className="db-bdg b-ativo">Ativo</span>;
+    if (sl.includes('vencido'))   return <span className="db-bdg b-vencido">Vencido</span>;
+    if (sl.includes('vence'))     return <span className="db-bdg b-vencendo">Vencendo</span>;
+    return <span className="db-bdg b-outro">{s||'—'}</span>;
+  };
+  const bAssin = a => {
+    const al=String(a||'').toLowerCase();
+    if (al.includes('completo'))  return <span className="db-assin as-ok">✓ Assinado</span>;
+    if (al.includes('pendente')||al.includes('aguard')) return <span className="db-assin as-pend">⏳ Pendente</span>;
+    return <span className="db-assin as-none">—</span>;
+  };
 
   return (
     <div>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24,flexWrap:'wrap',gap:10}}>
-        <h2 style={{fontSize:20,fontWeight:700,color:C.dark}}>Painel de Controle</h2>
-        <button onClick={onNovoContrato} style={{padding:'9px 20px',borderRadius:10,background:C.dark,color:'#fff',border:'none',cursor:'pointer',fontWeight:700,fontSize:13}}>
-          ➕ Novo Contrato
-        </button>
+      {/* KPIs */}
+      <div className="db-kpi-grid">
+        <div className="db-kpi db-kpi-hero">
+          <div className="db-kpi-eyebrow">Receita Mensal (MRR)</div>
+          <div className="db-kpi-val" style={{fontSize:22}}>{fmtS(dash.mrr)}</div>
+          <div className="db-kpi-lbl">Soma honorários ativos</div>
+          <div className="db-kpi-icon ic-hero">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+        </div>
+        <div className="db-kpi">
+          <div className="db-kpi-eyebrow">Clientes Ativos</div>
+          <div className={`db-kpi-val v-jade`}>{dash.ativos}</div>
+          <div className="db-kpi-lbl">de {dash.total} cadastrados</div>
+          <div className="db-kpi-icon ic-green">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+        </div>
+        <div className="db-kpi">
+          <div className="db-kpi-eyebrow">Vencendo em 60 dias</div>
+          <div className={`db-kpi-val ${dash.vencendo>0?'v-amber':'v-jade'}`}>{dash.vencendo}</div>
+          <div className="db-kpi-lbl">{dash.vencendo>0?'Requer atenção':'Nenhum vencendo'}</div>
+          <div className={`db-kpi-icon ${dash.vencendo>0?'ic-amber':'ic-green'}`}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+        </div>
+        <div className="db-kpi">
+          <div className="db-kpi-eyebrow">Contratos Vencidos</div>
+          <div className={`db-kpi-val ${dash.vencidos>0?'v-red':'v-jade'}`}>{dash.vencidos}</div>
+          <div className="db-kpi-lbl">{dash.vencidos>0?'Precisam renovação':'Nenhum vencido'}</div>
+          <div className={`db-kpi-icon ${dash.vencidos>0?'ic-red':'ic-green'}`}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+        </div>
       </div>
 
-      {!temAlertas && (
-        <div style={{textAlign:'center',padding:'60px 20px',color:C.muted}}>
-          <div style={{fontSize:48,marginBottom:12}}>✅</div>
-          <div style={{fontSize:16,fontWeight:700,color:C.dark,marginBottom:6}}>Tudo em dia!</div>
-          <div style={{fontSize:13}}>Nenhum alerta de vencimento ou processo pendente.</div>
+      {/* Main grid */}
+      <div className="db-main">
+
+        {/* Left */}
+        <div className="db-col">
+
+          {/* Alertas */}
+          <div className="db-card">
+            <div className="db-card-hd">
+              <div className="db-card-title">
+                <span className={`db-dot${totalAlertas>0?' d-red':''}`}></span>
+                Alertas
+              </div>
+              <span className={`db-cnt${totalAlertas>0?' c-red':''}`}>{totalAlertas}</span>
+            </div>
+            <div className="db-card-bd">
+              {totalAlertas===0 && (
+                <div className="db-empty">
+                  <div className="db-empty-ico">✅</div>
+                  <div className="db-empty-ttl">Tudo em dia!</div>
+                  <div className="db-empty-sub">Nenhum alerta de vencimento ou processo pendente.</div>
+                </div>
+              )}
+              {contVencidos.length>0 && (
+                <div className="db-alert a-red" onClick={()=>setView&&setView('contratos')}>
+                  <span className="db-alert-icon">🔴</span>
+                  <div style={{flex:1}}>
+                    <div className="db-alert-title">{contVencidos.length} contrato{contVencidos.length>1?'s':''} vencido{contVencidos.length>1?'s':''}</div>
+                    <div className="db-alert-sub">{contVencidos.slice(0,4).map(c=>c.cliente).join(' · ')}{contVencidos.length>4?` · +${contVencidos.length-4} mais`:''}</div>
+                  </div>
+                  <span className="db-alert-arr">→</span>
+                </div>
+              )}
+              {contVencendo.length>0 && (
+                <div className="db-alert a-amber" onClick={()=>setView&&setView('contratos')}>
+                  <span className="db-alert-icon">⚠️</span>
+                  <div style={{flex:1}}>
+                    <div className="db-alert-title">{contVencendo.length} contrato{contVencendo.length>1?'s':''} vencendo em 60 dias</div>
+                    <div className="db-alert-sub">{contVencendo.slice(0,4).map(c=>`${c.cliente} (${c.vencimento})`).join(' · ')}{contVencendo.length>4?` · +${contVencendo.length-4} mais`:''}</div>
+                  </div>
+                  <span className="db-alert-arr">→</span>
+                </div>
+              )}
+              {alvVencidos.length>0 && (
+                <div className="db-alert a-red" onClick={()=>setView&&setView('alvaras')}>
+                  <span className="db-alert-icon">🚨</span>
+                  <div style={{flex:1}}>
+                    <div className="db-alert-title">{alvVencidos.length} alvará{alvVencidos.length>1?'s':''} vencido{alvVencidos.length>1?'s':''}</div>
+                    <div className="db-alert-sub">{alvVencidos.slice(0,4).map(a=>a.empresa).join(' · ')}</div>
+                  </div>
+                  <span className="db-alert-arr">→</span>
+                </div>
+              )}
+              {alvRenovar.length>0 && (
+                <div className="db-alert a-amber" onClick={()=>setView&&setView('alvaras')}>
+                  <span className="db-alert-icon">🔔</span>
+                  <div style={{flex:1}}>
+                    <div className="db-alert-title">{alvRenovar.length} alvará{alvRenovar.length>1?'s':''} a vencer em 60 dias</div>
+                    <div className="db-alert-sub">{alvRenovar.slice(0,4).map(a=>a.empresa).join(' · ')}</div>
+                  </div>
+                  <span className="db-alert-arr">→</span>
+                </div>
+              )}
+              {socDemorados.length>0 && (
+                <div className="db-alert a-purple" onClick={()=>setView&&setView('societario')}>
+                  <span className="db-alert-icon">🏛️</span>
+                  <div style={{flex:1}}>
+                    <div className="db-alert-title">{socDemorados.length} processo{socDemorados.length>1?'s':''} na Junta há +10 dias</div>
+                    <div className="db-alert-sub">{socDemorados.slice(0,4).map(p=>{const pts=p.dtCriacao.split('/');const dias=Math.floor((hoje-new Date(+pts[2],+pts[1]-1,+pts[0]))/86400000);return `${p.razao||p.numero} (${dias}d)`;}).join(' · ')}</div>
+                  </div>
+                  <span className="db-alert-arr">→</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Últimos contratos */}
+          <div className="db-card">
+            <div className="db-card-hd">
+              <div className="db-card-title"><span className="db-dot"></span>Últimos Contratos</div>
+              <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                <span className="db-cnt">{(dash.recentes||[]).length}</span>
+                <button onClick={onNovoContrato} style={{padding:'5px 13px',borderRadius:8,background:C.dark,color:'#fff',border:'none',cursor:'pointer',fontWeight:600,fontSize:12}}>+ Novo</button>
+              </div>
+            </div>
+            {(dash.recentes||[]).length===0 ? (
+              <div className="db-card-bd">
+                <div className="db-empty"><div className="db-empty-ico">📄</div><div className="db-empty-ttl">Nenhum contrato</div><div className="db-empty-sub">Clique em "+ Novo" para criar.</div></div>
+              </div>
+            ) : (
+              <table className="db-tbl">
+                <thead>
+                  <tr><th>Cliente</th><th>Honorário</th><th>Vencimento</th><th>Status</th><th>Assinatura</th></tr>
+                </thead>
+                <tbody>
+                  {(dash.recentes||[]).map((c,i)=>{
+                    const dt=parseV(c.vencimento);
+                    const vctoColor=dt&&dt<hoje?'#DC2626':dt&&dt<=d60?'#D97706':'inherit';
+                    return (
+                      <tr key={i}>
+                        <td><div className="db-cli-name">{c.cliente||'—'}</div><div className="db-cli-num">{c.numero}</div></td>
+                        <td><span className="db-honor">{fmtM(c.honorario)}</span></td>
+                        <td><span className="db-vcto" style={{color:vctoColor}}>{c.vencimento||'—'}</span></td>
+                        <td>{bStatus(c.status)}</td>
+                        <td>{bAssin(c.statusAssin)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
-      )}
 
-      {/* Contratos vencidos */}
-      {contratosVencidos.length > 0 && (
-        <AlertBox
-          icon="🔴" bg="#fdecea" border="#f5c6cb" titleColor="#7f1d1d"
-          title={`${contratosVencidos.length} contrato(s) vencido(s)`}
-          subtitulo={contratosVencidos.slice(0,4).map(c=>c.cliente).join(' · ')+(contratosVencidos.length>4?' · ...':'')}
-          onClick={()=>setView&&setView('contratos')} btnLabel="Ver Contratos"
-        />
-      )}
+        {/* Right */}
+        <div className="db-col">
 
-      {/* Contratos vencendo */}
-      {contratosVencendo.length > 0 && (
-        <AlertBox
-          icon="⚠️" bg="#fff8e1" border="#ffe082" titleColor="#856404"
-          title={`${contratosVencendo.length} contrato(s) vencendo nos próximos 60 dias`}
-          subtitulo={contratosVencendo.slice(0,4).map(c=>`${c.cliente} (${c.vencimento})`).join(' · ')+(contratosVencendo.length>4?' · ...':'')}
-          onClick={()=>setView&&setView('contratos')} btnLabel="Ver Contratos"
-        />
-      )}
+          {/* Distribuição */}
+          <div className="db-card">
+            <div className="db-card-hd">
+              <div className="db-card-title"><span className="db-dot"></span>Distribuição</div>
+            </div>
+            <div className="db-card-bd">
+              <div style={{display:'flex',gap:20,alignItems:'center',marginBottom:4}}>
+                <div className="db-donut-wrap">
+                  <svg className="db-donut-svg" width="100" height="100" viewBox="0 0 100 100">
+                    <circle fill="none" stroke="#D6EDEA" strokeWidth="8" cx="50" cy="50" r="40"/>
+                    <circle ref={donutRef} fill="none" stroke="#2A9D8F" strokeWidth="8" strokeLinecap="round"
+                      strokeDasharray={CIRC} strokeDashoffset={CIRC} cx="50" cy="50" r="40"
+                      style={{transition:'stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)'}}/>
+                  </svg>
+                  <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',textAlign:'center'}}>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:20,fontWeight:600,color:'#172320',display:'block',lineHeight:1.1}}>{dash.total}</span>
+                    <span style={{fontSize:9,color:'#91B3AE',textTransform:'uppercase',letterSpacing:'.04em'}}>total</span>
+                  </div>
+                </div>
+                <div className="db-legend">
+                  {[['#2A9D8F','Ativos',dash.ativos],['#D97706','Vencendo',dash.vencendo],['#DC2626','Vencidos',dash.vencidos],['#9CA3AF','Outros',Math.max(0,dash.total-dash.ativos-dash.vencidos)]].map(([cor,lbl,val])=>(
+                    <div key={lbl} className="db-legend-item">
+                      <span className="db-legend-dot" style={{background:cor}}></span>
+                      <span className="db-legend-lbl">{lbl}</span>
+                      <span className="db-legend-val">{val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
 
-      {/* Alvarás vencidos */}
-      {alvarasVencidos.length > 0 && (
-        <AlertBox
-          icon="🚨" bg="#fdecea" border="#f5c6cb" titleColor="#7f1d1d"
-          title={`${alvarasVencidos.length} alvará(s) vencido(s)`}
-          subtitulo={alvarasVencidos.slice(0,4).map(a=>a.empresa).join(' · ')+(alvarasVencidos.length>4?' · ...':'')}
-          onClick={()=>setView&&setView('alvaras')} btnLabel="Ver Alvarás"
-        />
-      )}
+          {/* Indicadores */}
+          <div className="db-card">
+            <div className="db-card-hd">
+              <div className="db-card-title"><span className="db-dot"></span>Indicadores</div>
+            </div>
+            <div className="db-card-bd">
+              <div style={{marginBottom:14}}>
+                <div className="db-prog-hd"><span className="db-prog-lbl">Contratos ativos</span><span className="db-prog-val">{taxaAtivos}%</span></div>
+                <div className="db-prog-track"><div ref={progARef} className="db-prog-fill" style={{background:'#2A9D8F'}}></div></div>
+              </div>
+              <div style={{marginBottom:16}}>
+                <div className="db-prog-hd"><span className="db-prog-lbl">Assinaturas concluídas</span><span className="db-prog-val">{taxaAssin}%</span></div>
+                <div className="db-prog-track"><div ref={progAsRef} className="db-prog-fill" style={{background:'#1B6963'}}></div></div>
+              </div>
+              {[
+                ['#2A9D8F','Ticket médio',fmtS(ticketMedio),''],
+                ['#1B6963','Assinados',dash.assinados,'v-jade'],
+                ['#D97706','Alvarás a renovar',alvRenovar.length,alvRenovar.length>0?'v-amber':''],
+                ['#A855F7','Proc. Junta +10d',socDemorados.length,socDemorados.length>0?'v-red':''],
+              ].map(([cor,lbl,val,cls])=>(
+                <div key={lbl} className="db-stat-row">
+                  <span className="db-stat-lbl"><span className="db-st-dot" style={{background:cor}}></span>{lbl}</span>
+                  <span className={`db-stat-val ${cls}`}>{val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
-      {/* Alvarás a renovar */}
-      {alvarasRenovar.length > 0 && (
-        <AlertBox
-          icon="🔔" bg="#fff8e1" border="#ffc107" titleColor="#856404"
-          title={`${alvarasRenovar.length} alvará(s) a vencer em 60 dias`}
-          subtitulo={alvarasRenovar.slice(0,4).map(a=>a.empresa).join(' · ')+(alvarasRenovar.length>4?' · ...':'')}
-          onClick={()=>setView&&setView('alvaras')} btnLabel="Ver Alvarás"
-        />
-      )}
-
-      {/* Processos Junta parados */}
-      {processosDemorados.length > 0 && (
-        <AlertBox
-          icon="🏛️" bg="#f3e8ff" border="#c084fc" titleColor="#5b21b6"
-          title={`${processosDemorados.length} processo(s) na Junta há mais de 10 dias sem conclusão`}
-          subtitulo={processosDemorados.slice(0,4).map(p=>{
-            const [d,m,a]=p.dtCriacao.split('/');
-            const dias=Math.floor((hoje-new Date(+a,+m-1,+d))/86400000);
-            return `${p.razao||p.numero} (${dias}d)`;
-          }).join(' · ')+(processosDemorados.length>4?' · ...':'')}
-          onClick={()=>setView&&setView('societario')} btnLabel="Ver Societário"
-        />
-      )}
+        </div>
+      </div>
     </div>
   );
 }
